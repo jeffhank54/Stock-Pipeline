@@ -17,9 +17,11 @@ ALERT_THRESHOLD_PCT = 2.0      # alert if price moves >2%
 WINDOW_SECONDS = 5 * 60        # 5-minute rolling window
 
 tick_history = {}
+running_sum = {}
 
 for s in SYMBOLS:
     tick_history[s] = deque()
+    running_sum[s] = 0.0
 
 def process_tick(symbol, price, timestamp):
     """Core logic: store the tick, compute rolling stats, check for alerts.
@@ -29,17 +31,19 @@ def process_tick(symbol, price, timestamp):
 
     history = tick_history[symbol]
     history.append((timestamp, price))
+    running_sum[symbol] += price
 
     cutoff = timestamp - WINDOW_SECONDS
     while history and history[0][0] < cutoff:
-        history.popleft()
+        _, old_price = history.popleft()
+        running_sum[symbol] -= old_price
 
     if len(history) < 2:
         return
 
     oldest_price = history[0][1]
     pct_change = ((price - oldest_price) / oldest_price) * 100
-    rolling_avg = sum(p for _, p in history) / len(history)
+    rolling_avg = running_sum[symbol] / len(history)
 
     print(f"[{symbol}] price={price:.2f}  5m_change={pct_change:+.2f}%  "
             f"rolling_avg={rolling_avg:.2f}  window_size={len(history)}")
