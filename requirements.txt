@@ -3,3 +3,8 @@ python-dotenv==1.0.1
 websocket-client==1.8.0
 python-dotenv==1.0.1
 kafka-python-ng==2.2.3
+websocket-client==1.8.0
+python-dotenv==1.0.1
+kafka-python-ng==2.2.3
+psycopg2-binary==2.9.9
+redis==5.0.8

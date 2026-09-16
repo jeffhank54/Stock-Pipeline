@@ -1,3 +1,5 @@
+volumes:
+  pgdata:
 services:
   kafka:
     image: apache/kafka:3.8.0
@@ -15,3 +17,21 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: stockuser
+      POSTGRES_PASSWORD: stockpass
+      POSTGRES_DB: stockdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
