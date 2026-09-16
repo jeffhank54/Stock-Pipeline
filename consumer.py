@@ -1,7 +1,7 @@
 import json
 import sys
 from collections import deque
-from kafka import KafkaConsumer
+from kafka import KafkaConsumer, TopicPartition
 
 SYMBOLS = ["AAPL", "TSLA", "NVDA", "MSFT"]
 ALERT_THRESHOLD_PCT = 2.0
@@ -50,6 +50,19 @@ if __name__ == "__main__":
         value_deserializer=lambda v: json.loads(v.decode("utf-8")),
         auto_offset_reset="latest",  # only process new messages, ignore old ones on startup
     )
+
+        # Poll once to trigger partition assignment, then report what we got
+    consumer.poll(timeout_ms=1000)
+    assigned = consumer.assignment()
+    print(f"This consumer instance was assigned partitions: {sorted(p.partition for p in assigned)}\n")
+    message_count = 0
+    for message in consumer:
+        tick = message.value
+        process_tick(tick["symbol"], tick["price"], tick["timestamp"])
+        message_count += 1
+        if message_count % 10 == 0:
+            assigned = sorted(p.partition for p in consumer.assignment())
+            print(f"[assignment check] partitions: {assigned}")
 
     print(f"Consumer started (group_id={group_id}). Waiting for ticks...\n")
     for message in consumer:
