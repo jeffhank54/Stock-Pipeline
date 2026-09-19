@@ -15,6 +15,7 @@ ALERT_THRESHOLD_PCT = 2.0
 WINDOW_SECONDS = 5 * 60
 BATCH_SIZE = 20          # write to Postgres every N ticks, not every single one
 REDIS_TTL_SECONDS = 60   # if no update in 60s, key expires (signals staleness)
+KAFKA_BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 
 tick_history = {s: deque() for s in SYMBOLS}
 running_sum = {s: 0.0 for s in SYMBOLS}
@@ -116,7 +117,7 @@ if __name__ == "__main__":
 
     consumer = KafkaConsumer(
         "stock-ticks",
-        bootstrap_servers="localhost:9092",
+        bootstrap_servers=KAFKA_BOOTSTRAP,
         group_id=group_id,
         key_deserializer=lambda k: k.decode("utf-8") if k else None,
         value_deserializer=lambda v: json.loads(v.decode("utf-8")),

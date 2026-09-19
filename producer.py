@@ -11,9 +11,10 @@ load_dotenv()
 API_KEY = os.getenv("FINNHUB_API_KEY")
 MOCK_MODE = os.getenv("MOCK_MODE", "false").lower() == "true"
 SYMBOLS = ["AAPL", "TSLA", "NVDA", "MSFT"]
+KAFKA_BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 
 producer = KafkaProducer(
-    bootstrap_servers="localhost:9092",
+    bootstrap_servers=KAFKA_BOOTSTRAP,
     # key_serializer/value_serializer control how Python objects become bytes
     # on the wire — Kafka only ever moves raw bytes, it doesn't know about JSON.
     key_serializer=lambda k: k.encode("utf-8"),
