@@ -9,4 +9,4 @@ kafka-python-ng==2.2.3
 psycopg2-binary==2.9.9
 redis==5.0.8
 fastapi==0.115.0
-uvicorn==0.30.6
+uvicorn[standard]==0.30.6

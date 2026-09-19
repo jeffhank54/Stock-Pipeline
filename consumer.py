@@ -103,6 +103,13 @@ def process_tick(symbol, price, timestamp):
               f"in the last {WINDOW_SECONDS // 60} minutes!")
         write_alert_to_postgres(symbol, pct_change)
 
+        alert_payload = {
+            "symbol": symbol,
+            "pct_change": round(pct_change, 2),
+            "details": f"{symbol} moved {pct_change:+.2f}% in {WINDOW_SECONDS // 60} minutes",
+        }
+        r.publish("alerts", json.dumps(alert_payload))
+
 
 if __name__ == "__main__":
     group_id = "stock-workers"

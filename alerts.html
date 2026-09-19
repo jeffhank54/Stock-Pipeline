@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head><title>Live Stock Alerts</title></head>
+<body>
+    <h2>Live Alerts</h2>
+    <ul id="alerts"></ul>
+    <script>
+        const ws = new WebSocket("ws://localhost:8000/ws/alerts");
+        ws.onmessage = (event) => {
+            const alert = JSON.parse(event.data);
+            const li = document.createElement("li");
+            li.textContent = `${new Date().toLocaleTimeString()} — ${alert.details}`;
+            document.getElementById("alerts").prepend(li);
+        };
+        ws.onopen = () => console.log("Connected to alert feed");
+        ws.onerror = (err) => console.error("WebSocket error:", err);
+    </script>
+</body>
+</html>

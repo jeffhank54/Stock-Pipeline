@@ -5,6 +5,9 @@ import psycopg2
 import psycopg2.extras
 import redis
 from dotenv import load_dotenv
+import json
+import redis.asyncio as aioredis
+from fastapi import WebSocket, WebSocketDisconnect
 
 load_dotenv()
 
@@ -119,3 +122,24 @@ def get_active_alerts(limit: int = 20):
             for row in rows
         ],
     }
+    
+@app.websocket("/ws/alerts")
+async def websocket_alerts(websocket: WebSocket):
+    await websocket.accept()
+    redis_client = aioredis.Redis(
+        host=os.getenv("REDIS_HOST"),
+        port=int(os.getenv("REDIS_PORT")),
+        decode_responses=True,
+    )
+    pubsub = redis_client.pubsub()
+    await pubsub.subscribe("alerts")
+
+    try:
+        async for message in pubsub.listen():
+            if message["type"] == "message":
+                await websocket.send_text(message["data"])
+    except WebSocketDisconnect:
+        pass
+    finally:
+        await pubsub.unsubscribe("alerts")
+        await redis_client.close()
